@@ -1,0 +1,17 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+COPY server/package.json server/package.json
+RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+
+COPY server server
+RUN npm run db:generate -w server
+
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3000
+EXPOSE 3000
+
+CMD ["npm", "run", "start:prod", "-w", "server"]

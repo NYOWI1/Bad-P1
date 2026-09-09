@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: campus
+      POSTGRES_USER: campus
+      POSTGRES_PASSWORD: campus
+    ports:
+      - "5433:5432"
+    volumes:
+      - campus-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campus -d campus"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://campus:campus@db:5432/campus?schema=public
+      JWT_SECRET: ${JWT_SECRET:-local-dev-secret-with-more-than-thirty-two-characters}
+      DEMO_AUTH: ${DEMO_AUTH:-false}
+      CLIENT_ORIGIN: http://localhost:${WEB_PORT:-8080}
+    command: sh -c "npm run db:migrate -w server && npm run db:seed -w server && npm start -w server"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  campus-postgres:

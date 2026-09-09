@@ -1,0 +1,158 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', 'Avenir Next', 'Segoe UI', sans-serif;
+  --color-forest: #214e40;
+  --color-ink: #222b28;
+  --color-muted: #77807b;
+  --color-canvas: #f7f8fa;
+  --color-line: #e8ebe8;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    @apply m-0 bg-canvas text-ink antialiased;
+    font-size: 14px;
+  }
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button,
+  select {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+  button,
+  a {
+    touch-action: manipulation;
+  }
+  :focus-visible {
+    outline: 3px solid #7aa88a;
+    outline-offset: 4px;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: -0.035em;
+  }
+  input,
+  textarea,
+  select {
+    @apply outline-none;
+  }
+  input:focus,
+  textarea:focus,
+  select:focus {
+    @apply border-forest ring-2 ring-forest/10;
+  }
+  ::selection {
+    background: #dcecc4;
+    color: #214e40;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-2.5 text-sm font-medium transition hover:bg-slate-50 active:translate-y-px disabled:transform-none;
+  }
+  .btn-primary {
+    @apply border-forest bg-forest text-white hover:bg-[#163e31];
+  }
+  .btn-danger {
+    @apply border-red-200 text-red-700 hover:bg-red-50;
+  }
+  .input {
+    @apply w-full rounded-lg border border-[#dfe4df] bg-white px-3.5 py-2.5 text-sm;
+  }
+  .label {
+    @apply mb-2 block text-sm font-medium;
+  }
+  .panel {
+    @apply rounded-xl border border-line bg-white;
+  }
+  .page-title {
+    @apply text-[30px] leading-tight font-semibold tracking-[-0.045em] sm:text-[34px];
+  }
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.15em];
+  }
+  .nav-item {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#707b74] transition hover:bg-[#f0f3ef] hover:text-forest;
+  }
+  .nav-item.active {
+    @apply bg-[#eaf0e6] text-forest;
+  }
+  .category-pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-xs font-medium whitespace-nowrap transition hover:border-forest/30;
+  }
+  .category-pill.selected {
+    @apply border-forest bg-forest text-white;
+  }
+  .table-th {
+    @apply whitespace-nowrap bg-[#fafbf9] px-5 py-3 text-left text-xs font-medium text-muted;
+  }
+  .table-td {
+    @apply border-t border-line px-5 py-4;
+  }
+  .poster {
+    @apply relative flex h-44 flex-col justify-between overflow-hidden px-6 py-5;
+  }
+}
+
+.hero-pattern {
+  background-image: radial-gradient(#e5f2c533 1px, transparent 1px);
+  background-size: 15px 15px;
+}
+.poster-orbit {
+  position: absolute;
+  width: 165px;
+  height: 165px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  right: -35px;
+  top: 45px;
+  opacity: 0.18;
+  box-shadow:
+    0 0 0 16px currentColor,
+    0 0 0 34px transparent,
+    0 0 0 35px currentColor;
+}
+.fade-in {
+  animation: enter 0.3s ease both;
+}
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

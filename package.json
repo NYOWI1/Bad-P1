@@ -1,0 +1,28 @@
+{
+  "name": "campus-events",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:client": "npm run dev -w client",
+    "dev:server": "npm run dev -w server",
+    "build": "npm run build -w client",
+    "test": "npm test -w server",
+    "db:generate": "npm run db:generate -w server",
+    "db:migrate": "npm run db:migrate -w server",
+    "db:seed": "npm run db:seed -w server",
+    "db:docker:migrate": "DATABASE_URL=postgresql://campus:campus@127.0.0.1:5433/campus?schema=public npm run db:migrate -w server",
+    "db:docker:seed": "DATABASE_URL=postgresql://campus:campus@127.0.0.1:5433/campus?schema=public npm run db:seed -w server",
+    "db:studio": "DATABASE_URL=postgresql://campus:campus@127.0.0.1:5433/campus?schema=public prisma studio --schema server/prisma/schema.prisma",
+    "start": "npm start -w server",
+    "studio": "docker compose -f docker-compose.yml -f docker-compose.local.yml up -d db && DATABASE_URL=postgresql://campus:campus@127.0.0.1:5433/campus?schema=public npm run db:migrate -w server && DATABASE_URL=postgresql://campus:campus@127.0.0.1:5433/campus?schema=public prisma studio --schema server/prisma/schema.prisma"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

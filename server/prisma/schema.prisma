@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  ORGANIZER
+  STUDENT
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  CLOSED
+}
+
+enum RegistrationStatus {
+  REGISTERED
+  CANCELLED
+  ATTENDED
+  ABSENT
+}
+
+model User {
+  id            String   @id @default(cuid())
+  adObjectId    String?  @unique
+  email         String   @unique
+  name          String
+  phone         String?
+  role          Role     @default(STUDENT)
+  departmentId  String?
+  department    Department? @relation(fields: [departmentId], references: [id])
+  events        Event[]
+  registrations EventRegistration[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Department {
+  id     String @id @default(cuid())
+  name   String @unique
+  code   String @unique
+  users  User[]
+  events Event[]
+}
+
+model Event {
+  id                  String @id @default(cuid())
+  organizerId         String
+  organizer           User @relation(fields: [organizerId], references: [id])
+  departmentId        String
+  department          Department @relation(fields: [departmentId], references: [id])
+  title               String
+  description         String
+  category            String
+  location            String
+  capacity            Int
+  startAt             DateTime
+  endAt               DateTime
+  registrationClosesAt DateTime?
+  status              EventStatus @default(DRAFT)
+  googleCalendarId    String?
+  calendarSyncStatus  String @default("NOT_SYNCED")
+  externalEventId     String?
+  registrations       EventRegistration[]
+  roomBookings        EventRoomBooking[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([status, startAt])
+  @@index([organizerId])
+}
+
+model EventRegistration {
+  id            String @id @default(cuid())
+  eventId       String
+  event         Event @relation(fields: [eventId], references: [id])
+  studentId     String
+  student       User @relation(fields: [studentId], references: [id])
+  status        RegistrationStatus @default(REGISTERED)
+  source        String @default("CAMPUS")
+  externalRefId String?
+  registeredAt  DateTime @default(now())
+
+  @@unique([eventId, studentId])
+  @@index([studentId])
+}
+
+model Room {
+  id       String @id @default(cuid())
+  name     String @unique
+  building String
+  capacity Int
+  bookings EventRoomBooking[]
+}
+
+model EventRoomBooking {
+  id      String @id @default(cuid())
+  eventId String
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  roomId  String
+  room    Room @relation(fields: [roomId], references: [id])
+  startAt DateTime
+  endAt   DateTime
+
+  @@unique([eventId, roomId])
+  @@index([roomId, startAt, endAt])
+}
+
+model ApiKey {
+  id         String @id @default(cuid())
+  ownerLabel String
+  keyHash    String @unique
+  scope      String[]
+  active     Boolean @default(true)
+  createdAt  DateTime @default(now())
+}
