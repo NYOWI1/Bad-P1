@@ -1,6 +1,6 @@
 # Campus Event Management and Booking System
 
-The app supports event discovery, organizer event management, student registration, room booking, attendance tracking, administrator role/room/department/API-key management, Microsoft Entra ID authentication, Google Calendar sync hooks, Azure Key Vault production secrets, and AssistLink peer-system integration.
+The app supports event discovery, organizer event management, student registration, room booking, attendance tracking, administrator role/room/department/API-key management, Microsoft Entra ID authentication, Google Calendar sync hooks, Azure Key Vault production secrets, and protected peer API access.
 
 ## Stack
 
@@ -46,7 +46,7 @@ The dev runner applies migrations, seeds development seed data, starts the API o
 Development seed login is available only when DEMO_AUTH=true. Use it only for local testing:
 
 - Student: browse events, register, cancel registration, download calendar files
-- Organizer: create/edit events, publish/close/cancel events, manage attendees, check AssistLink registrations
+- Organizer: create/edit events, publish/close/cancel events, manage attendees
 - Admin: manage users, rooms, departments, API keys, and integration status
 
 ## Environment
@@ -75,8 +75,6 @@ GOOGLE_CLIENT_SECRET=
 GOOGLE_REFRESH_TOKEN=
 GOOGLE_CALENDAR_ID=
 
-ASSISTLINK_URL=
-ASSISTLINK_API_KEY=
 AZURE_KEY_VAULT_URL=
 ```
 
@@ -190,7 +188,7 @@ The API verifies JWT issuer, audience, scope, and authorized client. Roles are l
 
 Set Google OAuth credentials and `GOOGLE_CALENDAR_ID`. Publishing an event attempts to create or update a Google Calendar event. If Google credentials are missing, the event still publishes with `calendarSyncStatus=NOT_CONFIGURED`. Organizers and admins can retry calendar sync from the event management flow.
 
-## AssistLink Integration
+## Peer API Access
 
 Admins create hashed API keys in **Admin > API keys**. The raw key is shown once and only its SHA-256 hash is stored.
 
@@ -207,7 +205,7 @@ Create key request:
 ```json
 {
   "ownerLabel": "Partner Team Name",
-  "scope": ["assistlink:events:read", "assistlink:events:register"]
+  "scope": ["peer:events:read", "peer:events:register"]
 }
 ```
 
@@ -217,7 +215,7 @@ Create key response includes the one-time raw key:
 {
   "id": "...",
   "ownerLabel": "Partner Team Name",
-  "scope": ["assistlink:events:read", "assistlink:events:register"],
+  "scope": ["peer:events:read", "peer:events:register"],
   "active": true,
   "createdAt": "...",
   "key": "campus_..."
@@ -249,7 +247,7 @@ Peer registration request body:
 }
 ```
 
-Inbound AssistLink registrations reuse the same capacity, deadline, duplicate, and cancellation rules as normal student registrations. They appear in the attendees list with source `AssistLink`.
+Inbound peer API registrations reuse the same capacity, deadline, duplicate, and cancellation rules as normal student registrations. They appear in the attendees list with source `External API`.
 
 ## Docker
 
@@ -283,7 +281,7 @@ http://localhost:8080/project/
 Recommended production setup:
 
 1. Provision PostgreSQL or use a managed PostgreSQL service.
-2. Store `DATABASE_URL`, `JWT_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, `GOOGLE_CALENDAR_ID`, `ASSISTLINK_URL`, and `ASSISTLINK_API_KEY` in Azure Key Vault. Secret names use hyphens, for example `DATABASE-URL`.
+2. Store `DATABASE_URL`, `JWT_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, and `GOOGLE_CALENDAR_ID` in Azure Key Vault. Secret names use hyphens, for example `DATABASE-URL`.
 3. Give the VPS managed identity, workload identity, or service principal read access to the Key Vault.
 4. Run `docker compose up --build -d`.
 5. Put HTTPS in front of the web container with Nginx or your cloud load balancer.

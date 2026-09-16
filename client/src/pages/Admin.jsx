@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   KeyRound,
   CalendarDays,
-  Link2,
   ShieldCheck,
   ArrowRight,
   GraduationCap,
@@ -49,7 +48,7 @@ const managementConfig = {
   'api-keys': {
     title: 'Connect your campus.',
     eyebrow: 'Peer API keys',
-    subtitle: 'Manage secure access for AssistLink and your peer projects.',
+    subtitle: 'Manage secure access for trusted external clients.',
     endpoint: '/admin/api-keys'
   }
 };
@@ -92,7 +91,7 @@ function ManagementPage({ resource }) {
           ? { name: '', building: '', capacity: 50 }
           : resource === 'departments'
             ? { name: '', code: '' }
-            : { ownerLabel: 'AssistLink', scope: ['assistlink:events:read'] })
+            : { ownerLabel: 'Partner API client', scope: ['peer:events:read'] })
     );
   }
   async function save(e) {
@@ -361,7 +360,7 @@ function ManagementPage({ resource }) {
                 <Field label='Key owner' required {...bind('ownerLabel')} />
                 <fieldset>
                   <legend className='label'>Permissions</legend>
-                  {['assistlink:events:read', 'assistlink:events:register'].map(
+                  {['peer:events:read', 'peer:events:register'].map(
                     (scope) => (
                       <label
                         className='mb-3 flex items-center gap-2 text-sm'
@@ -380,7 +379,7 @@ function ManagementPage({ resource }) {
                             })
                           }
                         />
-                        {scope === 'assistlink:events:read'
+                        {scope === 'peer:events:read'
                           ? 'Read published events'
                           : 'Register students for events'}
                       </label>
@@ -510,13 +509,6 @@ export function Integrations() {
       note: 'Requires a calendar ID and Google OAuth credentials on the server.'
     },
     {
-      key: 'assistLink',
-      title: 'AssistLink',
-      icon: Link2,
-      desc: 'Connect campus events with research and teaching assistantship opportunities.',
-      note: 'Requires the peer server URL and an issued AssistLink API key.'
-    },
-    {
       key: 'microsoft',
       title: 'Microsoft university sign-in',
       icon: ShieldCheck,
@@ -561,14 +553,6 @@ export function Integrations() {
               <p className='mt-5 border-t border-line pt-4 text-xs leading-5 text-muted'>
                 {note}
               </p>
-              {key === 'assistLink' && user.role === 'ADMIN' && (
-                <Link
-                  to='/admin/api-keys'
-                  className='mt-4 inline-flex items-center gap-2 text-xs font-semibold text-forest'
-                >
-                  Manage peer API keys <ArrowRight size={13} />
-                </Link>
-              )}
             </div>
           ))}
         </div>

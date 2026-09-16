@@ -151,7 +151,7 @@ export async function registerStudent(eventId, studentId, external) {
       fail(409, 'Event is full.');
     const data = {
       status: 'REGISTERED',
-      source: external ? 'ASSISTLINK' : 'CAMPUS',
+      source: external ? 'PEER' : 'CAMPUS',
       externalRefId: external?.externalStudentId || null,
       registeredAt: new Date()
     };

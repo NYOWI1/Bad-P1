@@ -27,10 +27,6 @@ import {
   calendarConfigured,
   syncCalendar
 } from '../services/googleCalendar.service.js';
-import {
-  assistLinkConfigured,
-  getAssistLinkRegistrations
-} from '../services/assistLink.service.js';
 
 export const api = Router();
 const managers = requireRole('ADMIN', 'ORGANIZER');
@@ -65,8 +61,7 @@ const eventSchema = z
       .nullable()
       .optional(),
     departmentId: z.string().min(1),
-    roomId: z.string().min(1).nullable().optional(),
-    externalEventId: z.string().max(100).nullable().optional()
+    roomId: z.string().min(1).nullable().optional()
   })
   .strict();
 const roomSchema = z
@@ -239,7 +234,7 @@ const peerFields = {
   startAt: true,
   endAt: true
 };
-peer.get('/events', peerAuth('assistlink:events:read'), async (req, res) =>
+peer.get('/events', peerAuth('peer:events:read'), async (req, res) =>
   res.json({
     events: await db.event.findMany({
       where: { status: 'PUBLISHED' },
@@ -251,7 +246,7 @@ peer.get('/events', peerAuth('assistlink:events:read'), async (req, res) =>
 );
 peer.get(
   '/events/:id',
-  peerAuth('assistlink:events:read'),
+  peerAuth('peer:events:read'),
   async (req, res) => {
     const event = await db.event.findFirst({
       where: { id: req.params.id, status: 'PUBLISHED' },
@@ -263,7 +258,7 @@ peer.get(
 );
 peer.post(
   '/events/:id/registrations',
-  peerAuth('assistlink:events:register'),
+  peerAuth('peer:events:register'),
   async (req, res) => {
     const input = z
       .object({
@@ -474,14 +469,6 @@ api.patch('/registrations/:id', managers, async (req, res) => {
     })
   );
 });
-api.get('/events/:id/assistlink-registrations', managers, async (req, res) => {
-  const event = await getEvent(req.params.id);
-  owns(req.user, event);
-  if (!event.externalEventId)
-    fail(400, 'Set an AssistLink event ID in the event editor first.');
-  res.json(await getAssistLinkRegistrations(event.externalEventId));
-});
-
 api.get('/rooms', auth, async (req, res) =>
   res.json(
     await db.room.findMany({
@@ -614,7 +601,7 @@ api.post('/admin/api-keys', admin, async (req, res) => {
     .object({
       ownerLabel: z.string().trim().min(2).max(100),
       scope: z
-        .array(z.enum(['assistlink:events:read', 'assistlink:events:register']))
+        .array(z.enum(['peer:events:read', 'peer:events:register']))
         .min(1)
     })
     .strict()
@@ -642,7 +629,6 @@ api.delete('/admin/api-keys/:id', admin, async (req, res) => {
 api.get('/integrations', managers, (req, res) =>
   res.json({
     googleCalendar: calendarConfigured(),
-    assistLink: assistLinkConfigured(),
     microsoft: !!process.env.MICROSOFT_API_CLIENT_ID,
     keyVault: !!process.env.AZURE_KEY_VAULT_URL
   })

@@ -10,8 +10,7 @@ import {
   TrendingUp,
   Pencil,
   Search,
-  Download,
-  Link2
+  Download
 } from 'lucide-react';
 import { useApp, useResource } from '../context/AppContext';
 import { api } from '../services/api';
@@ -349,8 +348,7 @@ export function EventEditor() {
       roomId: '',
       startAt: '',
       endAt: '',
-      registrationClosesAt: '',
-      externalEventId: ''
+      registrationClosesAt: ''
     }),
     [busy, setBusy] = useState(false),
     [formError, setFormError] = useState('');
@@ -368,8 +366,7 @@ export function EventEditor() {
         endAt: localDate(event.endAt),
         registrationClosesAt: event.registrationClosesAt
           ? localDate(event.registrationClosesAt)
-          : '',
-        externalEventId: event.externalEventId || ''
+          : ''
       });
   }, [event]);
   const bind = (key) => ({
@@ -389,8 +386,7 @@ export function EventEditor() {
         endAt: new Date(values.endAt).toISOString(),
         registrationClosesAt: values.registrationClosesAt
           ? new Date(values.registrationClosesAt).toISOString()
-          : null,
-        externalEventId: values.externalEventId || null
+          : null
       };
       await api(id ? `/events/${id}` : '/events', {
         method: id ? 'PATCH' : 'POST',
@@ -536,17 +532,6 @@ export function EventEditor() {
               earlier deadline.
             </p>
           </section>
-          <section className='panel p-6'>
-            <h2 className='mb-4 text-lg font-semibold'>
-              AssistLink connection
-            </h2>
-            <Field
-              label='AssistLink event ID (optional)'
-              placeholder='Link a corresponding AssistLink event'
-              maxLength={100}
-              {...bind('externalEventId')}
-            />
-          </section>
           {(formError || departmentError || roomError) && (
             <ErrorMessage message={formError || departmentError || roomError} />
           )}
@@ -586,8 +571,7 @@ export function Attendees() {
   const { data: event } = useResource(`/events/${id}`),
     { data, loading, error } = useResource(`/events/${id}/registrations`);
   const [q, setQ] = useState(''),
-    [busy, setBusy] = useState(''),
-    [peer, setPeer] = useState(null);
+    [busy, setBusy] = useState('');
   const filtered = data?.filter((r) =>
     `${r.student.name} ${r.student.email}`
       .toLowerCase()
@@ -608,16 +592,6 @@ export function Attendees() {
       setBusy('');
     }
   }
-  async function loadPeer() {
-    setBusy('peer');
-    try {
-      setPeer(await api(`/events/${id}/assistlink-registrations`));
-    } catch (e) {
-      notify(e.message, 'error');
-    } finally {
-      setBusy('');
-    }
-  }
   return (
     <>
       <Link
@@ -630,11 +604,7 @@ export function Attendees() {
         title='The people making it happen'
         eyebrow='Registrations & attendance'
         subtitle={event?.title}
-      >
-        <button className='btn' disabled={!!busy} onClick={loadPeer}>
-          <Link2 size={15} /> View AssistLink registrations
-        </button>
-      </PageHeader>
+      />
       <div className='mb-5 flex flex-wrap items-center justify-between gap-3'>
         <p className='text-sm text-muted'>
           {data?.filter((r) => r.status !== 'CANCELLED').length || 0} registered
@@ -692,7 +662,7 @@ export function Attendees() {
                     {r.student.department?.name || 'Not specified'}
                   </td>
                   <td className='table-td text-xs text-muted'>
-                    {r.source === 'ASSISTLINK' ? 'AssistLink' : 'Campus'}
+                    {r.source === 'PEER' ? 'External API' : 'Campus'}
                   </td>
                   <td className='table-td text-xs text-muted'>
                     {date(r.registeredAt)}
@@ -722,26 +692,6 @@ export function Attendees() {
             </tbody>
           </table>
         </div>
-      )}
-      {peer && (
-        <Modal title='AssistLink registrations' onClose={() => setPeer(null)}>
-          {peer.length ? (
-            <div className='space-y-4'>
-              {peer.map((r, i) => (
-                <div key={i} className='border-b border-line pb-3'>
-                  <p className='font-medium'>{r.name}</p>
-                  <p className='mt-1 text-xs text-muted'>
-                    {r.email} · {r.department || 'Department not supplied'}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className='text-sm text-muted'>
-              No registrations returned by AssistLink.
-            </p>
-          )}
-        </Modal>
       )}
     </>
   );

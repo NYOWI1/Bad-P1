@@ -38,9 +38,7 @@ before(async () => {
     'GOOGLE_CLIENT_ID',
     'GOOGLE_CLIENT_SECRET',
     'GOOGLE_REFRESH_TOKEN',
-    'GOOGLE_CALENDAR_ID',
-    'ASSISTLINK_URL',
-    'ASSISTLINK_API_KEY'
+    'GOOGLE_CALENDAR_ID'
   ])
     process.env[key] = '';
   embedded = await PGlite.create();
@@ -302,8 +300,8 @@ test('attendance is tracked after start; cancelled registrations stay cancelled'
 test('peer API keys are hashed, scoped, and revocable', async () => {
   assert.equal((await request(app).get(`${base}/peer/v1/events`)).status, 401);
   const created = await as('post', '/admin/api-keys', 'ADMIN').send({
-    ownerLabel: 'AssistLink',
-    scope: ['assistlink:events:read']
+    ownerLabel: 'Partner client',
+    scope: ['peer:events:read']
   });
   assert.equal(created.status, 201);
   const key = created.body.key;
@@ -338,10 +336,10 @@ test('peer API keys are hashed, scoped, and revocable', async () => {
     )
   );
 });
-test('AssistLink registrations use the same capacity and duplicate checks', async () => {
+test('peer API registrations use the same capacity and duplicate checks', async () => {
   const created = await as('post', '/admin/api-keys', 'ADMIN').send({
-    ownerLabel: 'AssistLink writer',
-    scope: ['assistlink:events:register']
+    ownerLabel: 'Partner writer',
+    scope: ['peer:events:register']
   });
   const payload = {
     externalStudentId: 'peer-001',
@@ -363,7 +361,7 @@ test('AssistLink registrations use the same capacity and duplicate checks', asyn
   const stored = await db.eventRegistration.findUnique({
     where: { id: result.body.id }
   });
-  assert.equal(stored.source, 'ASSISTLINK');
+  assert.equal(stored.source, 'PEER');
   assert.equal(stored.externalRefId, 'peer-001');
 });
 test('closing blocks new registrations; cancelling hides events; admins can delete cancelled events', async () => {

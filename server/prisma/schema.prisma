@@ -67,7 +67,6 @@ model Event {
   status              EventStatus @default(DRAFT)
   googleCalendarId    String?
   calendarSyncStatus  String @default("NOT_SYNCED")
-  externalEventId     String?
   registrations       EventRegistration[]
   roomBookings        EventRoomBooking[]
   createdAt           DateTime @default(now())

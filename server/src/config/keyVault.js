@@ -18,9 +18,7 @@ export async function loadSecrets() {
     'GOOGLE_CLIENT_ID',
     'GOOGLE_CLIENT_SECRET',
     'GOOGLE_REFRESH_TOKEN',
-    'GOOGLE_CALENDAR_ID',
-    'ASSISTLINK_URL',
-    'ASSISTLINK_API_KEY'
+    'GOOGLE_CALENDAR_ID'
   ];
   for (const name of [...required, ...optional]) {
     // Azure secret names use hyphens; process configuration uses underscores.
